@@ -15,4 +15,14 @@ module.exports = (sequelize, Datatypes) => {
       collate: "utf8_general_ci",
     }
   );
+  Photo.associate = (db) => {
+    db.Photo.hasOne(db.Paylist);
+    db.Photo.hasMany(db.Comment);
+    db.Photo.hasMany(db.PDclare);
+    db.Photo.belongsTo(db.User);
+    db.Photo.belongsToMany(db.User, {through: "Like", as: "Likers"});
+    db.Photo.belongsToMany(db.User, {through: "Cart", as: "Shoper"});
+    db.Photo.belongsToMany(db.Picstory, {through: "PicPhotos"});
+  };
+  return Photo;
 };

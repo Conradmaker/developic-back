@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Apply = Sequelize.define(
+  const Apply = sequelize.define(
     "Apply",
     {
       reason: {type: DataTypes.STRING(200)},
@@ -10,4 +10,8 @@ module.exports = (sequelize, DataTypes) => {
       collate: "utf8_general_ci",
     }
   );
+  Apply.associate = (db) => {
+    db.Apply.belongsTo(db.User);
+  };
+  return Apply;
 };

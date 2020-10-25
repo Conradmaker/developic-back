@@ -10,4 +10,9 @@ module.exports = (sequelize, Datatypes) => {
       collate: "utf8_general_ci",
     }
   );
+
+  Notice.associate = (db) => {
+    db.Notice.belongsTo(db.User);
+  };
+  return Notice;
 };

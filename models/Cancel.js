@@ -7,4 +7,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {charset: "utf8", collate: "utf8_general_ci"}
   );
+  Cancel.associate = (db) => {
+    db.Cancel.belongsTo(db.User);
+    db.Cancel.belongsTo(db.Paylist);
+  };
+  return Cancel;
 };

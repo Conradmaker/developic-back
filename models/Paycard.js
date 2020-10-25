@@ -12,4 +12,8 @@ module.exports = (sequelize, Datatypes) => {
     },
     {charset: "utf8", collate: "utf8_general_ci"}
   );
+  Paycard.associate = (db) => {
+    db.Paycard.belongsTo(db.Paylist);
+  };
+  return Paycard;
 };

@@ -19,11 +19,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       ship_company: {type: DataTypes.STRING(50)},
       ship_code: {type: DataTypes.STRING(40)},
-      ship_updatedAt: {type: DataTypes.Date},
+      ship_updatedAt: {type: DataTypes.DATE},
     },
     {
       charset: "utf8",
       collate: "utf8_general_ci",
     }
   );
+  Paylist.associate = (db) => {
+    db.Paylist.hasOne(db.Cancel);
+    db.Paylist.hasOne(db.Paycard);
+    db.Paylist.belongsTo(db.User);
+    db.Paylist.belongsTo(db.Photo);
+  };
+  return Paylist;
 };

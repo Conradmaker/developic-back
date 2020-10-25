@@ -7,4 +7,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {charset: "utf8", collate: "utf8_general_ci"}
   );
+
+  Faq.associate = (db) => {
+    db.Faq.belongsTo(db.User);
+  };
+  return Faq;
 };

@@ -9,4 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       collate: "utf8_general_ci",
     }
   );
+  PDclare.associate = (db) => {
+    db.PDclare.belongsTo(db.User);
+    db.PDclare.belongsTo(db.Photo);
+  };
+  return PDclare;
 };
