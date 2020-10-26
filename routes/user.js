@@ -1,9 +1,36 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const {User} = require("../models");
+const passport = require("passport");
 
 const router = express.Router();
 
+//로그인
+router.post("/login", async (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    console.log(1111);
+    if (err) {
+      console.error(err);
+      return next(err);
+    }
+    if (info) {
+      return res.status(401).send(info.reason);
+    }
+    return req.logIn(user, async (loginErr) => {
+      if (loginErr) {
+        console.error(loginErr);
+        return next(loginErr);
+      }
+      const fullUser = await User.findOne({
+        where: {id: user.id},
+        attributes: {exclude: ["password"]},
+      });
+
+      return res.status(200).json(fullUser);
+    });
+  })(req, res, next);
+});
+//회원가입
 router.post("/signup", async (req, res, next) => {
   try {
     const exUser = await User.findOne({
