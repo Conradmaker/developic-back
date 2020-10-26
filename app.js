@@ -8,6 +8,7 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const passportConfig = require("./passport");
+const aboutRouter = require("./routes/about");
 
 const PORT = 3030;
 const app = express();
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
   res.send("123");
 });
 app.use("/user", userRouter);
+app.use("/about", aboutRouter);
 
 app.listen(PORT, () => {
   console.log(PORT, "에서 서버실행중");
