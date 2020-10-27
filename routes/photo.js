@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const {Picstory} = require("../models");
 
 const router = express.Router();
 try {
@@ -29,6 +30,27 @@ router.post("/upload/photo", upload.single("image"), async (req, res, next) => {
   try {
     console.log(req.file);
     res.status(201).send(req.file.filename);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+router.get("/load/picstory", async (req, res, next) => {
+  try {
+    const PicstoryList = await Picstory.findAll({where: {UserId: req.user.id}});
+    res.status(200).json(PicstoryList);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+router.post("/upload/picstory", async (req, res, next) => {
+  try {
+    const newPicstory = await Picstory.create({
+      name: req.body.name,
+      UserId: req.user.id,
+    });
+    res.status(201).json(newPicstory);
   } catch (e) {
     console.error(e);
     next(e);
