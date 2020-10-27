@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const passportConfig = require("./passport");
 const aboutRouter = require("./routes/about");
+const photoRouter = require("./routes/photo");
+const path = require("path");
 
 const PORT = 3030;
 const app = express();
@@ -23,7 +25,7 @@ app.use(logger("dev"));
 app.use(cors({origin: "http://localhost:3000", credentials: true}));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
+app.use("/", express.static(path.join(__dirname, "uploads")));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(
   session({
@@ -39,6 +41,7 @@ app.get("/", (req, res) => {
 });
 app.use("/user", userRouter);
 app.use("/about", aboutRouter);
+app.use("/photo", photoRouter);
 
 app.listen(PORT, () => {
   console.log(PORT, "에서 서버실행중");
