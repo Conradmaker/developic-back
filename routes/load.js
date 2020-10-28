@@ -1,4 +1,5 @@
 const exporess = require("express");
+const {Op} = require("sequelize");
 const {Photo, User} = require("../models");
 
 const router = exporess.Router();
@@ -54,6 +55,30 @@ router.get("/feed/:cata", async (req, res, next) => {
     });
     console.log(feeds);
     res.status(200).json(feeds);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+router.get("/shop/:cata", async (req, res, next) => {
+  try {
+    const where = {sale: 0};
+    if (parseInt(req.params.cata, 10) !== 5) {
+      where.catagory = parseInt(req.params.cata, 10);
+    }
+    if (parseInt(req.query.lastId, 10)) {
+      where.id = {[Op.lt]: parseInt(req.query.lastId, 10)};
+    }
+    const shops = await Photo.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+      attributes: {exclude: ["info", "sale"]},
+      include: [
+        {model: User, attributes: ["nickname"]},
+        {model: User, as: "Likers", attributes: ["id"]},
+      ],
+    });
+    res.status(200).json(shops);
   } catch (e) {
     console.error(e);
     next(e);
