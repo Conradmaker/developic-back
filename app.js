@@ -10,6 +10,7 @@ const passport = require("passport");
 const passportConfig = require("./passport");
 const aboutRouter = require("./routes/about");
 const photoRouter = require("./routes/photo");
+const loadRouter = require("./routes/load");
 const path = require("path");
 
 const PORT = 3030;
@@ -39,6 +40,8 @@ app.use(passport.session());
 app.get("/", (req, res) => {
   res.send("123");
 });
+
+app.use("/load", loadRouter);
 app.use("/user", userRouter);
 app.use("/about", aboutRouter);
 app.use("/photo", photoRouter);
