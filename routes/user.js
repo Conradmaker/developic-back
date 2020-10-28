@@ -2,11 +2,12 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const {User} = require("../models");
 const passport = require("passport");
+const {isLoggedIn, isNotLoggedIn} = require("./common");
 
 const router = express.Router();
 
 //로그인
-router.post("/login", async (req, res, next) => {
+router.post("/login", isNotLoggedIn, async (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) {
       console.error(err);
@@ -30,7 +31,7 @@ router.post("/login", async (req, res, next) => {
   })(req, res, next);
 });
 //회원가입
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", isNotLoggedIn, async (req, res, next) => {
   try {
     const exUser = await User.findOne({
       where: {
@@ -54,7 +55,7 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 //로그아웃
-router.get("/logout", (req, res, next) => {
+router.get("/logout", isLoggedIn, (req, res, next) => {
   try {
     req.logOut();
     req.session.destroy();

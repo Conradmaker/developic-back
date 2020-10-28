@@ -2,7 +2,8 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const {Picstory} = require("../models");
+const {Picstory, Photo} = require("../models");
+const {isLoggedIn} = require("./common");
 
 const router = express.Router();
 try {
@@ -26,16 +27,46 @@ const upload = multer({
 });
 
 //이미지업로드
-router.post("/upload/photo", upload.single("image"), async (req, res, next) => {
+router.post(
+  "/upload/photo",
+  isLoggedIn,
+  upload.single("image"),
+  async (req, res, next) => {
+    try {
+      console.log(req.file);
+      res.status(201).send(req.file.filename);
+    } catch (e) {
+      console.error(e);
+      next(e);
+    }
+  }
+);
+//이미지업로드
+router.post("/upload/post", isLoggedIn, async (req, res, next) => {
   try {
-    console.log(req.file);
-    res.status(201).send(req.file.filename);
+    if (!req.user) {
+      res.status(400).send("로그인해주세요.");
+    }
+    const newPhoto = await Photo.create({
+      name: req.body.name,
+      sale: req.body.sale ? 1 : 0,
+      price: req.body.price,
+      image_src: req.body.src,
+      info: req.body.info,
+      catagory: req.body.catagory,
+      UserId: req.user.id,
+    });
+    if (req.body.picstory) {
+      const album = await Picstory.findOne({where: {id: req.body.picstory}});
+      await album.addPhoto(newPhoto.id);
+    }
+    res.status(201).send("성공적으로 생성되었습니다.");
   } catch (e) {
     console.error(e);
     next(e);
   }
 });
-router.get("/load/picstory", async (req, res, next) => {
+router.get("/load/picstory", isLoggedIn, async (req, res, next) => {
   try {
     const PicstoryList = await Picstory.findAll({where: {UserId: req.user.id}});
     res.status(200).json(PicstoryList);
@@ -44,7 +75,7 @@ router.get("/load/picstory", async (req, res, next) => {
     next(e);
   }
 });
-router.post("/upload/picstory", async (req, res, next) => {
+router.post("/upload/picstory", isLoggedIn, async (req, res, next) => {
   try {
     const newPicstory = await Picstory.create({
       name: req.body.name,

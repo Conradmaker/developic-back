@@ -1,12 +1,12 @@
 const express = require("express");
 const {Apply, Qna} = require("../models");
+const {isLoggedIn} = require("./common");
 
 const router = express();
 
 //작가신청
-router.post("/apply", async (req, res, next) => {
+router.post("/apply", isLoggedIn, async (req, res, next) => {
   try {
-    //이부분 미들웨어로 만들자
     const incorrect = req.user.id === req.body.id;
     if (!incorrect) {
       return res.status(400).send("사용자가 맞습니까?");
@@ -30,9 +30,8 @@ router.post("/apply", async (req, res, next) => {
 });
 
 //Q&A질문등록
-router.post("/addqna", async (req, res, next) => {
+router.post("/addqna", isLoggedIn, async (req, res, next) => {
   try {
-    //이부분 미들웨어로 만들자
     const incorrect = req.user.id === req.body.id;
     if (!incorrect) {
       return res.status(400).send("사용자가 맞습니까?");
