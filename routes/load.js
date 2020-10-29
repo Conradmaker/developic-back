@@ -1,6 +1,6 @@
 const exporess = require("express");
 const {Op} = require("sequelize");
-const {Photo, User} = require("../models");
+const {Photo, User, Comment} = require("../models");
 
 const router = exporess.Router();
 
@@ -79,6 +79,24 @@ router.get("/shop/:cata", async (req, res, next) => {
       ],
     });
     res.status(200).json(shops);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+//상세정보 불러오기
+router.get("/detail/:photoId", async (req, res, next) => {
+  try {
+    const photo = await Photo.findOne({
+      where: {id: req.params.photoId},
+      include: [
+        {model: User, attributes: ["id", "nickname"]},
+        {model: User, as: "Shoper", attributes: ["id"]},
+        {model: User, as: "Likers", attributes: ["id"]},
+        {model: Comment, attributes: {exclude: ["updatedAt", "createdAt"]}},
+      ],
+    });
+    res.status(200).json(photo);
   } catch (e) {
     console.error(e);
     next(e);

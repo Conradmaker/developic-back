@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const {Picstory, Photo} = require("../models");
+const {Picstory, Photo, Comment} = require("../models");
 const {isLoggedIn} = require("./common");
 
 const router = express.Router();
@@ -82,6 +82,21 @@ router.post("/upload/picstory", isLoggedIn, async (req, res, next) => {
       UserId: req.user.id,
     });
     res.status(201).json(newPicstory);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//댓글작성
+router.post("/comment", isLoggedIn, async (req, res, next) => {
+  try {
+    const comment = await Comment.create({
+      content: req.body.content,
+      UserId: req.user.id,
+      PhotoId: req.body.id,
+    });
+    res.status(201).json(comment);
   } catch (e) {
     console.error(e);
     next(e);
