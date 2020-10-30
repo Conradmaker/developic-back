@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const {Picstory, Photo, Comment, User} = require("../models");
+const {Picstory, Photo, Comment, User, PDclare} = require("../models");
 const {isLoggedIn} = require("./common");
 
 const router = express.Router();
@@ -87,5 +87,45 @@ router.post("/upload/picstory", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
-
+//작품신고
+router.post("/declare", isLoggedIn, async (req, res, next) => {
+  try {
+    await PDclare.create({
+      reason: req.body.reason,
+      UserId: req.body.userId,
+      PhotoId: req.body.photoId,
+    });
+    res.status(201).send("신고신청완료");
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+//좋아요
+router.post("/like", isLoggedIn, async (req, res, next) => {
+  try {
+    const photo = await Photo.findOne({where: {id: req.body.photoId}});
+    if (!photo) {
+      return res.status(403).send("게시글이 없어요!");
+    }
+    await photo.addLikers(req.body.userId);
+    res.status(201).json({id: req.body.userId});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+router.post("/unlike", isLoggedIn, async (req, res, next) => {
+  try {
+    const photo = await Photo.findOne({where: {id: req.body.photoId}});
+    if (!photo) {
+      return res.status(403).send("게시글이 없어요!");
+    }
+    await photo.removeLikers(req.body.userId);
+    res.status(200).json({id: req.body.userId});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 module.exports = router;
