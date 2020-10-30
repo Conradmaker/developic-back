@@ -3,49 +3,63 @@ const logger = require("morgan");
 const dotenv = require("dotenv");
 const db = require("./models");
 const cors = require("cors");
-const userRouter = require("./routes/user");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const passportConfig = require("./passport");
-const aboutRouter = require("./routes/about");
-const photoRouter = require("./routes/photo");
-const loadRouter = require("./routes/load");
 const path = require("path");
+class App {
+  constructor() {
+    this.app = express();
+    //sequelize
+    this.setDataBase();
+    //passport
+    this.setPassport();
+    //미들웨어
+    this.setMiddleWare();
+    //정적 디렉토리 추가
+    this.setStatic();
+    //라우팅
+    this.getRouting();
+  }
 
-const PORT = 3030;
-const app = express();
-dotenv.config();
+  setDataBase() {
+    dotenv.config();
+    db.sequelize
+      .sync()
+      .then(() => console.log("DB연결성공"))
+      .catch(console.error("DB에러발생"));
+  }
 
-db.sequelize
-  .sync()
-  .then(() => console.log("DB연결성공"))
-  .catch(console.error("DB에러발생"));
-passportConfig();
-app.use(logger("dev"));
-app.use(cors({origin: "http://localhost:3000", credentials: true}));
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use("/", express.static(path.join(__dirname, "uploads")));
-app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(
-  session({
-    saveUninitialized: false,
-    resave: true,
-    secret: process.env.COOKIE_SECRET,
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
-app.get("/", (req, res) => {
-  res.send("123");
-});
+  setPassport() {
+    passportConfig();
+  }
 
-app.use("/load", loadRouter);
-app.use("/user", userRouter);
-app.use("/about", aboutRouter);
-app.use("/photo", photoRouter);
+  setMiddleWare() {
+    this.app.use(logger("dev"));
+    this.app.use(cors({origin: "http://localhost:3000", credentials: true}));
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({extended: true}));
 
-app.listen(PORT, () => {
-  console.log(PORT, "에서 서버실행중");
-});
+    this.app.use(cookieParser(process.env.COOKIE_SECRET));
+    this.app.use(
+      session({
+        saveUninitialized: false,
+        resave: true,
+        secret: process.env.COOKIE_SECRET,
+      })
+    );
+    this.app.use(passport.initialize());
+    this.app.use(passport.session());
+  }
+
+  setStatic() {
+    this.app.use("/", express.static(path.join(__dirname, "uploads")));
+  }
+
+  getRouting() {
+    this.app.use(require("./routes"));
+  }
+}
+
+module.exports = new App().app;

@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const {Picstory, Photo, Comment} = require("../models");
+const {Picstory, Photo, Comment, User} = require("../models");
 const {isLoggedIn} = require("./common");
 
 const router = express.Router();
@@ -96,7 +96,12 @@ router.post("/comment", isLoggedIn, async (req, res, next) => {
       UserId: req.user.id,
       PhotoId: req.body.id,
     });
-    res.status(201).json(comment);
+    const fullComment = await Comment.findOne({
+      where: {id: comment.id},
+      attributes: {exclude: ["createdAt"]},
+      include: [{model: User, attributes: ["nickname"]}],
+    });
+    res.status(201).json(fullComment);
   } catch (e) {
     console.error(e);
     next(e);

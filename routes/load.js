@@ -93,7 +93,11 @@ router.get("/detail/:photoId", async (req, res, next) => {
         {model: User, attributes: ["id", "nickname"]},
         {model: User, as: "Shoper", attributes: ["id"]},
         {model: User, as: "Likers", attributes: ["id"]},
-        {model: Comment, attributes: {exclude: ["updatedAt", "createdAt"]}},
+        {
+          model: Comment,
+          attributes: {exclude: ["createdAt"]},
+          include: [{model: User, attributes: ["nickname"]}],
+        },
       ],
     });
     res.status(200).json(photo);

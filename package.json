@@ -6,7 +6,7 @@
   "author": "conrad",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon server.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
