@@ -88,23 +88,4 @@ router.post("/upload/picstory", isLoggedIn, async (req, res, next) => {
   }
 });
 
-//댓글작성
-router.post("/comment", isLoggedIn, async (req, res, next) => {
-  try {
-    const comment = await Comment.create({
-      content: req.body.content,
-      UserId: req.user.id,
-      PhotoId: req.body.id,
-    });
-    const fullComment = await Comment.findOne({
-      where: {id: comment.id},
-      attributes: {exclude: ["createdAt"]},
-      include: [{model: User, attributes: ["nickname"]}],
-    });
-    res.status(201).json(fullComment);
-  } catch (e) {
-    console.error(e);
-    next(e);
-  }
-});
 module.exports = router;
