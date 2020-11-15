@@ -1,6 +1,7 @@
 const exporess = require("express");
+const {where} = require("sequelize");
 const {Op} = require("sequelize");
-const {Photo, User, Comment} = require("../models");
+const {Photo, User, Comment, Picstory} = require("../models");
 
 const router = exporess.Router();
 
@@ -101,6 +102,60 @@ router.get("/detail/:photoId", async (req, res, next) => {
       ],
     });
     res.status(200).json(photo);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+//프로필과 최신글 10개 불러오기 (인피니트는 따로 라우팅)
+router.get("/profile/:userId", async (req, res, next) => {
+  try {
+    where: {
+    }
+    const profile = await User.findOne({
+      where: {id: req.params.userId},
+      attributes: {
+        exclude: ["password", "lastLogin", "createdAt", "updatedAt"],
+      },
+      include: [
+        {
+          model: Picstory,
+          attributes: {
+            exclude: ["updatedAt"],
+          },
+        },
+      ],
+    });
+    where.userId = req.params.userId;
+    const picstory = await Picstory.findAll({
+      where,
+      attributes: {exclude: ["createdAt", "UserId"]},
+      include: [
+        {
+          model: Photo,
+          attributes: {exclude: ["createdAt", "UserId", "info"]},
+          include: [
+            {model: User, attributes: ["nickname"]},
+            {model: User, as: "Likers", attributes: ["id"]},
+          ],
+        },
+      ],
+    });
+    if (parseInt(req.query.lastId, 10)) {
+      where.id = {[Op.lt]: parseInt(req.query.lastId, 10)};
+    }
+
+    const userPhotos = await Photo.findAll({
+      where,
+      limit: 10,
+      order: [["createdAt", "DESC"]],
+      attributes: {exclude: ["info", "price", "sale"]},
+      include: [
+        {model: User, attributes: ["nickname"]},
+        {model: User, as: "Likers", attributes: ["id"]},
+      ],
+    });
+    res.status(200).json({profile, userPhotos, picstory});
   } catch (e) {
     console.error(e);
     next(e);

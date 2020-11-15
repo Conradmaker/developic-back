@@ -3,6 +3,9 @@ const bcrypt = require("bcrypt");
 const {User} = require("../models");
 const passport = require("passport");
 const {isLoggedIn, isNotLoggedIn} = require("./common");
+const {Photo} = require("../models");
+const multer = require("multer");
+const fs = require("fs");
 
 const router = express.Router();
 
@@ -24,6 +27,10 @@ router.post("/login", isNotLoggedIn, async (req, res, next) => {
       const fullUser = await User.findOne({
         where: {id: user.id},
         attributes: {exclude: ["password"]},
+        include: [
+          {model: Photo, as: "Liked", attributes: ["id"]},
+          {model: Photo, as: "CartIn", attributes: ["id"]},
+        ],
       });
 
       return res.status(200).json(fullUser);
@@ -73,11 +80,43 @@ router.get("/", async (req, res, next) => {
       const fullUser = await User.findOne({
         where: {id: req.user.id},
         attributes: {exclude: ["password"]},
+        include: [
+          {model: Photo, as: "Liked", attributes: ["id"]},
+          {model: Photo, as: "CartIn", attributes: ["id"]},
+        ],
       });
       res.status(200).json(fullUser);
     } else {
       res.status(200).json(null);
     }
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//유저정보 수정
+router.post("/change", isLoggedIn, async (req, res, next) => {
+  try {
+    const exsistUser = await User.findOne({where: {id: req.user.id}});
+    await exsistUser.update({
+      nickname:
+        req.body.nickname !== "" ? req.body.nickname : exsistUser.nickname,
+      phone: req.body.phone !== "" ? req.body.phone : exsistUser.phone,
+      sns: req.body.sns !== "" ? req.body.sns : exsistUser.sns,
+      address: req.body.address !== "" ? req.body.address : exsistUser.address,
+      info: req.body.info !== "" ? req.body.info : exsistUser.info,
+      avatar: req.body.src !== "" ? req.body.src : exsistUser.src,
+    });
+    const fullUser = await User.findOne({
+      where: {id: req.user.id},
+      attributes: {exclude: ["password"]},
+      include: [
+        {model: Photo, as: "Liked", attributes: ["id"]},
+        {model: Photo, as: "CartIn", attributes: ["id"]},
+      ],
+    });
+    res.status(201).json(fullUser);
   } catch (e) {
     console.error(e);
     next(e);

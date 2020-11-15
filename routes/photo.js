@@ -41,7 +41,7 @@ router.post(
     }
   }
 );
-//이미지업로드
+//작품업로드
 router.post("/upload/post", isLoggedIn, async (req, res, next) => {
   try {
     if (!req.user) {
@@ -66,6 +66,7 @@ router.post("/upload/post", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
+//픽스토리 불러오기
 router.get("/load/picstory", isLoggedIn, async (req, res, next) => {
   try {
     const PicstoryList = await Picstory.findAll({where: {UserId: req.user.id}});
@@ -75,6 +76,7 @@ router.get("/load/picstory", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
+//픽스토리생성
 router.post("/upload/picstory", isLoggedIn, async (req, res, next) => {
   try {
     const newPicstory = await Picstory.create({
