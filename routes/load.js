@@ -97,7 +97,7 @@ router.get("/detail/:photoId", async (req, res, next) => {
         {
           model: Comment,
           attributes: {exclude: ["createdAt"]},
-          include: [{model: User, attributes: ["nickname"]}],
+          include: [{model: User, attributes: ["id", "avatar", "nickname"]}],
         },
       ],
     });
