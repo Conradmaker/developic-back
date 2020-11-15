@@ -1,5 +1,5 @@
 const express = require("express");
-const {User} = require("../models");
+const {User, Comment, Photo} = require("../models");
 const {isLoggedIn} = require("./common");
 
 const router = express.Router();
@@ -30,6 +30,20 @@ router.delete("/like/:photoId", isLoggedIn, async (req, res, next) => {
     }
     await user.removeLiked(parseInt(req.params.photoId));
     res.status(200).json({id: parseInt(req.params.photoId)});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//댓글목록 조회
+router.get("/comment", isLoggedIn, async (req, res, next) => {
+  try {
+    const CommentList = await Comment.findAll({
+      where: {UserId: req.user.id},
+      include: [{model: Photo, attributes: ["id", "name", "image_src"]}],
+    });
+    res.status(200).json(CommentList);
   } catch (e) {
     console.error(e);
     next(e);
