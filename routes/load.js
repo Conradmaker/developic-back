@@ -1,6 +1,5 @@
 const exporess = require("express");
-const {where} = require("sequelize");
-const {Op} = require("sequelize");
+const {where, Op} = require("sequelize");
 const {Photo, User, Comment, Picstory} = require("../models");
 
 const router = exporess.Router();
@@ -156,6 +155,34 @@ router.get("/profile/:userId", async (req, res, next) => {
       ],
     });
     res.status(200).json({profile, userPhotos, picstory});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//검색기능
+router.get("/search/:text", async (req, res, next) => {
+  try {
+    const where = {};
+    where.name = {[Op.like]: `%${req.params.text}%`};
+    if (parseInt(req.query.lastId, 10)) {
+      where.id = {[Op.lt]: parseInt(req.query.lastId, 10)};
+    }
+    if (JSON.parse(req.query.sale)) {
+      where.sale = 0;
+    }
+    const searchList = await Photo.findAll({
+      where,
+      limit: 9,
+      attributes: {exclude: ["info", "sale"]},
+      include: [
+        {model: User, attributes: ["nickname"]},
+        {model: User, as: "Likers", attributes: ["id"]},
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+    res.status(200).json(searchList);
   } catch (e) {
     console.error(e);
     next(e);

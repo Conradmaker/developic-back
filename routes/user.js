@@ -122,4 +122,28 @@ router.post("/change", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
+
+//카트추가
+router.post("/cart", isLoggedIn, async (req, res, next) => {
+  try {
+    const currentUser = await User.findOne({where: {id: req.user.id}});
+    await currentUser.addCartIn(req.body.id);
+    res.status(201).json({photoId: req.body.id});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//카트아웃
+router.delete("/cart/:photoId", isLoggedIn, async (req, res, next) => {
+  try {
+    const currentUser = await User.findOne({where: {id: req.user.id}});
+    await currentUser.removeCartIn(parseInt(req.params.photoId, 10));
+    res.status(201).json({photoId: parseInt(req.params.photoId, 10)});
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 module.exports = router;

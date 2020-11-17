@@ -1,6 +1,7 @@
 const express = require("express");
-const {User, Comment, Photo} = require("../models");
+const {User, Comment, Photo, Qna} = require("../models");
 const {isLoggedIn} = require("./common");
+const {Op} = require("sequelize");
 
 const router = express.Router();
 
@@ -44,6 +45,22 @@ router.get("/comment", isLoggedIn, async (req, res, next) => {
       include: [{model: Photo, attributes: ["id", "name", "image_src"]}],
     });
     res.status(200).json(CommentList);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//Qna조회
+router.get("/qna", isLoggedIn, async (req, res, next) => {
+  try {
+    const notAnswer = await Qna.findAll({
+      where: {QueUserId: req.user.id, ans_content: null},
+    });
+    const answered = await Qna.findAll({
+      where: {QueUserId: req.user.id, ans_content: {[Op.ne]: null}},
+    });
+    res.status(200).send({notAnswer, answered});
   } catch (e) {
     console.error(e);
     next(e);
