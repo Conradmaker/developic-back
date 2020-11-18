@@ -66,4 +66,33 @@ router.get("/qna", isLoggedIn, async (req, res, next) => {
     next(e);
   }
 });
+
+//장바구니
+router.get("/cart", isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({where: {id: req.user.id}});
+    const cartList = await user.getCartIn({
+      model: Photo,
+      attributes: ["id", "name", "price", "image_src"],
+      include: [{model: User, attributes: ["id", "nickname"]}],
+    });
+    res.status(200).send(cartList);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//장바구니일괄삭제
+router.post("/carts", isLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.findOne({where: {id: req.user.id}});
+    console.log(req.body.data);
+    req.body.data.forEach((v) => user.removeCartIn(v));
+    res.status(200).send(req.body.data);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 module.exports = router;
