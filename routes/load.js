@@ -109,11 +109,9 @@ router.get("/detail/:photoId", async (req, res, next) => {
 //프로필과 최신글 10개 불러오기 (인피니트는 따로 라우팅)
 router.get("/profile/:userId", async (req, res, next) => {
   try {
-    const where = {
-      id: req.params.userId,
-    };
+    let where = {};
     const profile = await User.findOne({
-      where,
+      where: {id: req.params.userId},
       attributes: {
         exclude: ["password", "lastLogin", "createdAt", "updatedAt"],
       },
