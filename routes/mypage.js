@@ -1,5 +1,5 @@
 const express = require("express");
-const {User, Comment, Photo, Qna} = require("../models");
+const {User, Comment, Photo, Qna, Apply} = require("../models");
 const {isLoggedIn} = require("./common");
 const {Op} = require("sequelize");
 
@@ -90,6 +90,17 @@ router.post("/carts", isLoggedIn, async (req, res, next) => {
     console.log(req.body.data);
     req.body.data.forEach((v) => user.removeCartIn(v));
     res.status(200).send(req.body.data);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
+
+//작가신청 조회
+router.get("/apply", isLoggedIn, async (req, res, next) => {
+  try {
+    const apply = await Apply.findOne({where: {UserId: req.user.id}});
+    res.status(200).json(apply);
   } catch (e) {
     console.error(e);
     next(e);

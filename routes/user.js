@@ -6,6 +6,7 @@ const {isLoggedIn, isNotLoggedIn} = require("./common");
 const {Photo} = require("../models");
 const multer = require("multer");
 const fs = require("fs");
+const {Sequelize} = require("sequelize");
 
 const router = express.Router();
 
@@ -32,8 +33,8 @@ router.post("/login", isNotLoggedIn, async (req, res, next) => {
           {model: Photo, as: "CartIn", attributes: ["id"]},
         ],
       });
-
-      return res.status(200).json(fullUser);
+      const postLength = await Photo.findAll({where: {UserId: req.user.id}});
+      return res.status(200).json({user: fullUser, postLength});
     });
   })(req, res, next);
 });
@@ -85,7 +86,8 @@ router.get("/", async (req, res, next) => {
           {model: Photo, as: "CartIn", attributes: ["id"]},
         ],
       });
-      res.status(200).json(fullUser);
+      const postLength = await Photo.findAll({where: {UserId: req.user.id}});
+      res.status(200).json({user: fullUser, postLength});
     } else {
       res.status(200).json(null);
     }
@@ -145,5 +147,15 @@ router.delete("/cart/:photoId", isLoggedIn, async (req, res, next) => {
     console.error(e);
     next(e);
   }
+});
+
+//shakePic
+router.get("/shakeuser", async (req, res, next) => {
+  const users = await User.findOne({
+    order: Sequelize.literal("rand()"),
+    attributes: ["id"],
+  });
+  console.log(users);
+  res.status(200).send(users);
 });
 module.exports = router;
